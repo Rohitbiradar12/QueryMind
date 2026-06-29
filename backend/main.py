@@ -8,6 +8,7 @@ Endpoints:
   POST   /api/chats/{chat_id}/messages    send a message, get AI reply
 """
 
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,9 +44,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Allowed frontend origins. Defaults to the local Vite dev server; in
+# production set FRONTEND_ORIGIN to your deployed frontend URL(s),
+# comma-separated, e.g. "https://query-mind-blush.vercel.app".
+_origins_env = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+ALLOWED_ORIGINS = [o.strip() for o in _origins_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["*"],

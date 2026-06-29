@@ -30,7 +30,11 @@ async def close_pool() -> None:
 
 
 async def get_pool() -> asyncpg.Pool:
-    """Get the current pool. Raises if not initialized."""
+    """Get the current pool, creating it lazily if needed.
+
+    Lazy creation lets this work in serverless environments (e.g. Vercel),
+    where the FastAPI startup lifespan may not run before the first request.
+    """
     if _pool is None:
-        raise RuntimeError("Pool not initialized. Call init_pool() first.")
+        return await init_pool()
     return _pool
