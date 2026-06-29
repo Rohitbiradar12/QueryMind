@@ -49,7 +49,9 @@ app = FastAPI(
 # production set FRONTEND_ORIGIN to your deployed frontend URL(s),
 # comma-separated, e.g. "https://query-mind-blush.vercel.app".
 _origins_env = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
-ALLOWED_ORIGINS = [o.strip() for o in _origins_env.split(",") if o.strip()]
+# Normalize: split on commas and strip any trailing slash, since CORS origins
+# are matched exactly and a browser Origin header never has a trailing slash.
+ALLOWED_ORIGINS = [o.strip().rstrip("/") for o in _origins_env.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
