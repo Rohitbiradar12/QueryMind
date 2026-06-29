@@ -1,6 +1,8 @@
 // Backend base URL. Set VITE_API_URL in production (e.g. your deployed backend);
 // falls back to the local dev server when it's not defined.
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Trailing slashes are stripped so we never produce a double-slash URL
+// (e.g. ".../api/chats" not "...//api/chats", which causes a 308 redirect).
+const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
 
 async function handle(response) {
   if (!response.ok) {
