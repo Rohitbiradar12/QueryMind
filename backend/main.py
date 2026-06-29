@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import init_pool, close_pool
+from database import close_pool
 from gemini_client import run_conversation
 from title_generator import generate_title
 from models import (
@@ -28,8 +28,9 @@ import chat_repository as repo
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("[Startup] Initializing database pool...")
-    await init_pool()
+    # The pool is created lazily on first DB use (serverless-friendly). We do NOT
+    # eagerly connect here, so an unreachable database can't crash startup — the
+    # health check still responds and DB errors surface as clean per-request 500s.
     print("[Startup] Ready.")
     yield
     print("[Shutdown] Closing database pool...")
